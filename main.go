@@ -5,6 +5,7 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/julien040/go-ternary"
 	"github.com/net-byte/go-gateway"
 	"github.com/toqueteos/webbrowser"
 )
@@ -23,24 +24,24 @@ func main() {
 	}
 
 	fmt.Println("Gateway IP: ", gateway)
-
 	var port int
 
 	for {
-		fmt.Print("Enter port number between 0 to 65535: (8080) ")
+		fmt.Print("Enter port number between 0 to 65536: (Optional) ")
 		var input string
 		fmt.Scanln(&input)
 		if input == "" {
-			port = 8080
 			break
 		}
-		port, err = strconv.Atoi(input)
-		if err == nil && port >= 0 && port <= 65535 {
+		number, err := strconv.Atoi(input)
+		if err == nil && number > 0 && number < 65536 {
+			port = number
 			break
 		}
 	}
 
-	err = webbrowser.Open(fmt.Sprint("http://", gateway, ":", port, "/"))
+	portOrEmptyString := ternary.If(port == 0, "", fmt.Sprint(":", port))
+	err = webbrowser.Open(fmt.Sprint("http://", gateway, portOrEmptyString, "/"))
 	if err != nil {
 		printMessageAndExit("Unable to open URL in Browser")
 	}
